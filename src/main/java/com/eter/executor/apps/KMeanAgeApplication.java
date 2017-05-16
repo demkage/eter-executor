@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 /**
  * Created by rusifer on 5/13/17.
  */
-public class KMeanAgeApplication {
+public class KMeanAgeApplication implements Application {
     private String sparkMaster;
     private String hdfsUrl;
     private Model model;

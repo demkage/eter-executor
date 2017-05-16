@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by rusifer on 5/13/17.
  */
-public class ALSApplication {
+public class ALSApplication implements Application {
     private String sparkMaster;
     private String hdfsUrl;
     private Model model;
