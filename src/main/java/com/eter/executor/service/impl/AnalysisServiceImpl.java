@@ -1,9 +1,10 @@
 package com.eter.executor.service.impl;
 
-import com.eter.executor.apps.ALSApplication;
-import com.eter.executor.apps.Application;
-import com.eter.executor.apps.KMeanAgeApplication;
+import com.eter.executor.apps.*;
+import com.eter.executor.domain.GroupStatistic;
 import com.eter.executor.domain.Model;
+import com.eter.executor.domain.SaleData;
+import com.eter.executor.domain.SaleResult;
 import com.eter.executor.domain.recomendation.ProductRating;
 import com.eter.executor.service.AnalysisService;
 import com.eter.executor.service.ModelService;
@@ -19,6 +20,8 @@ import java.util.List;
 public class AnalysisServiceImpl implements AnalysisService {
     private ALSApplication alsApplication;
     private KMeanAgeApplication kMeanAgeApplication;
+    private SalesAnalysis salesAnalysisApplication;
+    private KMeanGenderApplication kMeanGenderApplication;
     private ModelService modelService;
 
     @Autowired
@@ -29,6 +32,16 @@ public class AnalysisServiceImpl implements AnalysisService {
     @Autowired
     public void setkMeanAgeApplication(KMeanAgeApplication kMeanAgeApplication) {
         this.kMeanAgeApplication = kMeanAgeApplication;
+    }
+
+    @Autowired
+    public void setSalesAnalysisApplication(SalesAnalysis salesAnalysisApplication) {
+        this.salesAnalysisApplication = salesAnalysisApplication;
+    }
+
+    @Autowired
+    public void setkMeanGenderApplication(KMeanGenderApplication kMeanGenderApplication) {
+        this.kMeanGenderApplication = kMeanGenderApplication;
     }
 
     @Autowired
@@ -44,6 +57,13 @@ public class AnalysisServiceImpl implements AnalysisService {
     }
 
     @Override
+    public List<ProductRating> recommendProductsForUser(int userId, int num) {
+        initApplication(alsApplication, "als");
+
+        return alsApplication.recommendProdutsForUser(userId, num);
+    }
+
+    @Override
     public List<ProductRating> topProducts(int num) {
        initApplication(alsApplication, "als");
 
@@ -55,6 +75,27 @@ public class AnalysisServiceImpl implements AnalysisService {
         initApplication(kMeanAgeApplication, "kmeanage");
 
         return kMeanAgeApplication.predictGroupFor(age);
+    }
+
+    @Override
+    public GroupStatistic predictStatisticsByAge(List<Integer> ages) {
+        initApplication(kMeanAgeApplication, "kmeanage");
+
+        return kMeanAgeApplication.predict(ages);
+    }
+
+    @Override
+    public GroupStatistic predictStatisticsByGender(List<String> genders) {
+        initApplication(kMeanGenderApplication, "kmeangender");
+
+        return kMeanGenderApplication.predict(genders);
+    }
+
+    @Override
+    public List<SaleResult> predictSales(List<SaleData> salesData) {
+        initApplication(salesAnalysisApplication, "salesanalysis");
+
+        return salesAnalysisApplication.test(salesData);
     }
 
     private boolean initApplication(Application application, String modelName) {

@@ -1,11 +1,12 @@
 package com.eter.executor.controller;
 
+import com.eter.executor.domain.GroupStatistic;
+import com.eter.executor.domain.SaleData;
+import com.eter.executor.domain.SaleResult;
 import com.eter.executor.domain.recomendation.ProductRating;
 import com.eter.executor.service.AnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,6 +29,17 @@ public class AnalysisController {
         return analysisService.predictForUserIdAndProductId(userId, productId);
     }
 
+    @RequestMapping("/als/recommend/user/{userId}")
+    public List<ProductRating> alsRecommendForUser(@PathVariable("userId") int userId) {
+        return analysisService.recommendProductsForUser(userId, 5);
+    }
+
+    @RequestMapping("/als/recommend/user/{userId}/{num}")
+    public List<ProductRating> alsRecommendForUser(@PathVariable("userId") int userId,
+                                                   @PathVariable("num") int num) {
+        return analysisService.recommendProductsForUser(userId, num);
+    }
+
     @RequestMapping("/als/top/{num}")
     public List<ProductRating> topProducts(@PathVariable("num") int num) {
         return analysisService.topProducts(num);
@@ -36,5 +48,20 @@ public class AnalysisController {
     @RequestMapping("/kmean/age/group/{age}")
     public double kmeanAgeGroupForAge(@PathVariable("age") int age) {
         return analysisService.predictGroupForAge(age);
+    }
+
+    @RequestMapping(value = "/kmean/age/statistic", method = RequestMethod.POST)
+    public GroupStatistic kmeanAgeStatistic(@RequestBody List<Integer> ages) {
+        return analysisService.predictStatisticsByAge(ages);
+    }
+
+    @RequestMapping(value = "/kmean/gender/statistic", method = RequestMethod.POST)
+    public GroupStatistic kmeanGenderStatistic(@RequestBody List<String> genders) {
+        return analysisService.predictStatisticsByGender(genders);
+    }
+
+    @RequestMapping(value = "/sales", method = RequestMethod.POST)
+    public List<SaleResult> salesAnalysis(@RequestBody List<SaleData> saleData) {
+        return analysisService.predictSales(saleData);
     }
 }

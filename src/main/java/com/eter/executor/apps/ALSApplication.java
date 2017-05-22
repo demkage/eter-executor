@@ -3,10 +3,12 @@ package com.eter.executor.apps;
 import com.eter.executor.domain.Model;
 import com.eter.executor.domain.recomendation.ProductRating;
 import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
+import org.apache.spark.mllib.recommendation.Rating;
 import org.apache.spark.sql.SparkSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,6 +55,15 @@ public class ALSApplication implements Application {
 
     public double predictForUserIdAndProductId(int userId, int productId) {
         return factorizationModel.predict(userId, productId);
+    }
+
+    public List<ProductRating> recommendProdutsForUser(int userId, int num) {
+        List<ProductRating> products = new ArrayList<>();
+        for(Rating rating : factorizationModel.recommendProducts(userId, num)) {
+            products.add(new ProductRating(rating.product(), rating.rating()));
+        }
+
+        return products;
     }
 
     public List<ProductRating> recommendProductsForUser(int num) {

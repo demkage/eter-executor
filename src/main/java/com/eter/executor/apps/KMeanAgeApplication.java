@@ -1,21 +1,31 @@
 package com.eter.executor.apps;
 
+import com.eter.executor.domain.GroupStatistic;
 import com.eter.executor.domain.Model;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
 import org.apache.spark.mllib.clustering.KMeansModel;
+import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.sql.SparkSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by rusifer on 5/13/17.
  */
-public class KMeanAgeApplication implements Application {
+public class KMeanAgeApplication implements Application, Serializable {
     private String sparkMaster;
     private String hdfsUrl;
     private Model model;
     private KMeansModel kMeansModel;
     private boolean isReady;
+    private SparkSession sparkSession;
 
     @Autowired
     public void setSparkMaster(@Value("${eter.spark.master}") String sparkMaster) {
@@ -32,7 +42,7 @@ public class KMeanAgeApplication implements Application {
     }
 
     public boolean load() {
-        SparkSession sparkSession = new SparkSession.Builder()
+        sparkSession = new SparkSession.Builder()
                 .appName("KMean-Age-executor")
                 .master("local")
                 .getOrCreate();
@@ -51,6 +61,32 @@ public class KMeanAgeApplication implements Application {
 
     public double predictGroupFor(int age) {
        return kMeansModel.predict(Vectors.dense(age));
+    }
+
+    public GroupStatistic predict(List<Integer> ages) {
+        GroupStatistic groupStatistic = new GroupStatistic();
+        groupStatistic.setGroupsCount(kMeansModel.clusterCenters().length);
+        Vector[] centers = kMeansModel.clusterCenters();
+        int currentGroup = 0;
+        for(Vector center : centers) {
+            groupStatistic.addCenter("" + currentGroup, center.toArray()[0]);
+            ++currentGroup;
+        }
+
+        JavaSparkContext javaSparkContext = new JavaSparkContext(sparkSession.sparkContext());
+
+        JavaRDD<Integer> rddAges = javaSparkContext.parallelize(ages);
+        JavaRDD<Vector> points = rddAges.map((Function<Integer, Vector>)
+                v1 -> Vectors.dense(new double[] { v1.doubleValue()}));
+
+        Map<Integer, Long> result = kMeansModel.predict(points).countByValue();
+
+        for(Map.Entry<Integer, Long> entry : result.entrySet()) {
+            groupStatistic.addGroup(entry.getKey().toString(),
+                    (Long.valueOf(entry.getValue()).doubleValue() / ages.size()));
+        }
+
+        return groupStatistic;
     }
 
     public boolean isReady() {
