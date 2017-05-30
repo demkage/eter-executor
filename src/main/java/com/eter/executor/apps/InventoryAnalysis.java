@@ -79,7 +79,7 @@ public class InventoryAnalysis implements Application {
                 .stream()
                 .forEach(
                         row -> invetoryResult.add(
-                                new InventoryResult(row.getLong(0), row.getDouble(4))
+                                new InventoryResult(row.getLong(0), row.getDouble(6))
                         )
                 );
 
