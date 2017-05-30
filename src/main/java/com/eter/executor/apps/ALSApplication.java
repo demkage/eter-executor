@@ -2,6 +2,9 @@ package com.eter.executor.apps;
 
 import com.eter.executor.domain.Model;
 import com.eter.executor.domain.recomendation.ProductRating;
+import org.apache.spark.ml.Pipeline;
+import org.apache.spark.ml.PipelineModel;
+import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
 import org.apache.spark.mllib.recommendation.Rating;
 import org.apache.spark.sql.SparkSession;
@@ -19,7 +22,13 @@ public class ALSApplication implements Application {
     private String hdfsUrl;
     private Model model;
     private MatrixFactorizationModel factorizationModel;
+    private SparkApplication sparkApplication;
     private boolean isReady;
+
+    @Autowired
+    public void setSparkApplication(SparkApplication sparkApplication) {
+        this.sparkApplication = sparkApplication;
+    }
 
     @Autowired
     public void setSparkMaster(@Value("${eter.spark.master}") String sparkMaster) {
@@ -36,13 +45,9 @@ public class ALSApplication implements Application {
     }
 
     public boolean load() {
-        SparkSession sparkSession = new SparkSession.Builder()
-                .appName("ALS-executor")
-                .master("local")
-                .getOrCreate();
 
-        factorizationModel = MatrixFactorizationModel.load(sparkSession.sparkContext(),
-                hdfsUrl + model.getPath());
+        factorizationModel = MatrixFactorizationModel
+                .load(sparkApplication.getSession().sparkContext(), hdfsUrl + model.getPath());
 
         if(factorizationModel != null) {
             isReady = true;
@@ -66,7 +71,7 @@ public class ALSApplication implements Application {
         return products;
     }
 
-    public List<ProductRating> recommendProductsForUser(int num) {
+    public List<ProductRating> recommendProductsForUsers(int num) {
         return factorizationModel.recommendProductsForUsers(num).toJavaRDD().map((value) ->
             new ProductRating(value._2()[0].product(), value._2()[0].rating())
         ).take(num);

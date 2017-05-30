@@ -1,8 +1,6 @@
 package com.eter.executor.service;
 
-import com.eter.executor.domain.GroupStatistic;
-import com.eter.executor.domain.SaleData;
-import com.eter.executor.domain.SaleResult;
+import com.eter.executor.domain.*;
 import com.eter.executor.domain.recomendation.ProductRating;
 
 import java.util.List;
@@ -24,4 +22,6 @@ public interface AnalysisService {
     GroupStatistic predictStatisticsByGender(List<String> genders);
 
     List<SaleResult> predictSales(List<SaleData> salesData);
+
+    List<InventoryResult> predictInventory(List<InventoryData> inventoryData);
 }

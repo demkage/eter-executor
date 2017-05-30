@@ -26,8 +26,13 @@ public class SalesAnalysis implements Application {
     private String hdfsUrl;
     private boolean isReady;
     private Model model;
-    private SparkSession sparkSession;
+    private SparkApplication sparkApplication;
     private PipelineModel pipelineModel;
+
+    @Autowired
+    public void setSparkApplication(SparkApplication sparkApplication) {
+        this.sparkApplication = sparkApplication;
+    }
 
     @Autowired
     public void setSparkMaster(@Value("${eter.spark.master}") String sparkMaster) {
@@ -42,11 +47,6 @@ public class SalesAnalysis implements Application {
 
     @Override
     public boolean load() {
-        sparkSession = new SparkSession.Builder()
-                .appName("Sales Analysis Executor")
-                .master("local")
-                .getOrCreate();
-
         pipelineModel = PipelineModel.load(hdfsUrl + model.getPath());
         if (pipelineModel != null) {
             isReady = true;
@@ -79,7 +79,7 @@ public class SalesAnalysis implements Application {
                 new StructField("promo", DataTypes.BooleanType, false, Metadata.empty())
         });
 
-        Dataset<Row> saleDataset = sparkSession.createDataFrame(salesRows, schema);
+        Dataset<Row> saleDataset = sparkApplication.getSession().createDataFrame(salesRows, schema);
 
         Dataset<Row> result = pipelineModel.transform(saleDataset)
                 .withColumnRenamed("prediction", "sales");

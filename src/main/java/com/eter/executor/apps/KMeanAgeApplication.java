@@ -25,7 +25,12 @@ public class KMeanAgeApplication implements Application, Serializable {
     private Model model;
     private KMeansModel kMeansModel;
     private boolean isReady;
-    private SparkSession sparkSession;
+    private SparkApplication sparkApplication;
+
+    @Autowired
+    public void setSparkApplication(SparkApplication sparkApplication) {
+        this.sparkApplication = sparkApplication;
+    }
 
     @Autowired
     public void setSparkMaster(@Value("${eter.spark.master}") String sparkMaster) {
@@ -42,12 +47,9 @@ public class KMeanAgeApplication implements Application, Serializable {
     }
 
     public boolean load() {
-        sparkSession = new SparkSession.Builder()
-                .appName("KMean-Age-executor")
-                .master("local")
-                .getOrCreate();
 
-        kMeansModel = KMeansModel.load(sparkSession.sparkContext(), hdfsUrl + model.getPath());
+        kMeansModel = KMeansModel
+                .load(sparkApplication.getSession().sparkContext(), hdfsUrl + model.getPath());
 
         if(kMeansModel != null) {
             isReady = true;
@@ -73,7 +75,7 @@ public class KMeanAgeApplication implements Application, Serializable {
             ++currentGroup;
         }
 
-        JavaSparkContext javaSparkContext = new JavaSparkContext(sparkSession.sparkContext());
+        JavaSparkContext javaSparkContext = new JavaSparkContext(sparkApplication.getSession().sparkContext());
 
         JavaRDD<Integer> rddAges = javaSparkContext.parallelize(ages);
         JavaRDD<Vector> points = rddAges.map((Function<Integer, Vector>)

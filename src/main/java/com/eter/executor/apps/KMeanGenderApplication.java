@@ -29,7 +29,12 @@ public class KMeanGenderApplication implements Application, Serializable {
     private Model model;
     private PipelineModel pipelineModel;
     private boolean isReady;
-    private SparkSession sparkSession;
+    private SparkApplication sparkApplication;
+
+    @Autowired
+    public void setSparkApplication(SparkApplication sparkApplication) {
+        this.sparkApplication = sparkApplication;
+    }
 
     @Autowired
     public void setSparkMaster(@Value("${eter.spark.master}") String sparkMaster) {
@@ -46,10 +51,6 @@ public class KMeanGenderApplication implements Application, Serializable {
     }
 
     public boolean load() {
-        sparkSession = new SparkSession.Builder()
-                .appName("KMean-Gender-executor")
-                .master("local")
-                .getOrCreate();
 
         pipelineModel = PipelineModel.load(hdfsUrl + model.getPath());
 
@@ -74,7 +75,7 @@ public class KMeanGenderApplication implements Application, Serializable {
                 new StructField("sex", DataTypes.StringType, false, Metadata.empty())
         });
 
-        Dataset<Row> dataset = sparkSession.createDataFrame(genderRows, schema);
+        Dataset<Row> dataset = sparkApplication.getSession().createDataFrame(genderRows, schema);
 
         Dataset<Row> result = pipelineModel.transform(dataset)
                 .withColumnRenamed("prediction", "group");

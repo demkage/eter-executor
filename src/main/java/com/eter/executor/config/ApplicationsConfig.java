@@ -1,9 +1,6 @@
 package com.eter.executor.config;
 
-import com.eter.executor.apps.ALSApplication;
-import com.eter.executor.apps.KMeanAgeApplication;
-import com.eter.executor.apps.KMeanGenderApplication;
-import com.eter.executor.apps.SalesAnalysis;
+import com.eter.executor.apps.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,6 +9,13 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class ApplicationsConfig {
+
+    @Bean
+    public SparkApplication sparkApplication() {
+        SparkApplication sparkApplication = new SparkApplication();
+        sparkApplication.run();
+        return sparkApplication;
+    }
 
     @Bean
     public ALSApplication alsApplication() {
@@ -31,5 +35,10 @@ public class ApplicationsConfig {
     @Bean
     public KMeanGenderApplication kMeanGenderApplication() {
         return new KMeanGenderApplication();
+    }
+
+    @Bean
+    public InventoryAnalysis inventoryAnalysis() {
+        return new InventoryAnalysis();
     }
 }

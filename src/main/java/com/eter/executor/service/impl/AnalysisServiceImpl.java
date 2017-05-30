@@ -1,10 +1,7 @@
 package com.eter.executor.service.impl;
 
 import com.eter.executor.apps.*;
-import com.eter.executor.domain.GroupStatistic;
-import com.eter.executor.domain.Model;
-import com.eter.executor.domain.SaleData;
-import com.eter.executor.domain.SaleResult;
+import com.eter.executor.domain.*;
 import com.eter.executor.domain.recomendation.ProductRating;
 import com.eter.executor.service.AnalysisService;
 import com.eter.executor.service.ModelService;
@@ -22,6 +19,7 @@ public class AnalysisServiceImpl implements AnalysisService {
     private KMeanAgeApplication kMeanAgeApplication;
     private SalesAnalysis salesAnalysisApplication;
     private KMeanGenderApplication kMeanGenderApplication;
+    private InventoryAnalysis inventoryAnalysis;
     private ModelService modelService;
 
     @Autowired
@@ -42,6 +40,11 @@ public class AnalysisServiceImpl implements AnalysisService {
     @Autowired
     public void setkMeanGenderApplication(KMeanGenderApplication kMeanGenderApplication) {
         this.kMeanGenderApplication = kMeanGenderApplication;
+    }
+
+    @Autowired
+    public void setInventoryAnalysis(InventoryAnalysis inventoryAnalysis) {
+        this.inventoryAnalysis = inventoryAnalysis;
     }
 
     @Autowired
@@ -67,7 +70,7 @@ public class AnalysisServiceImpl implements AnalysisService {
     public List<ProductRating> topProducts(int num) {
        initApplication(alsApplication, "als");
 
-        return alsApplication.recommendProductsForUser(num);
+        return alsApplication.recommendProductsForUsers(num);
     }
 
     @Override
@@ -96,6 +99,13 @@ public class AnalysisServiceImpl implements AnalysisService {
         initApplication(salesAnalysisApplication, "salesanalysis");
 
         return salesAnalysisApplication.test(salesData);
+    }
+
+    @Override
+    public List<InventoryResult> predictInventory(List<InventoryData> inventoryData) {
+        initApplication(inventoryAnalysis, "inventoryanalysis");
+
+        return inventoryAnalysis.predict(inventoryData);
     }
 
     private boolean initApplication(Application application, String modelName) {

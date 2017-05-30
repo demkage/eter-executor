@@ -1,8 +1,6 @@
 package com.eter.executor.controller;
 
-import com.eter.executor.domain.GroupStatistic;
-import com.eter.executor.domain.SaleData;
-import com.eter.executor.domain.SaleResult;
+import com.eter.executor.domain.*;
 import com.eter.executor.domain.recomendation.ProductRating;
 import com.eter.executor.service.AnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,5 +61,10 @@ public class AnalysisController {
     @RequestMapping(value = "/sales", method = RequestMethod.POST)
     public List<SaleResult> salesAnalysis(@RequestBody List<SaleData> saleData) {
         return analysisService.predictSales(saleData);
+    }
+
+    @RequestMapping(value = "/invetory", method = RequestMethod.POST)
+    public List<InventoryResult> inventoryAnalysis(@RequestBody List<InventoryData> inventories) {
+        return analysisService.predictInventory(inventories);
     }
 }
