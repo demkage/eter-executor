@@ -64,7 +64,7 @@ public class InventoryAnalysis implements Application {
         StructType schema = new StructType(new StructField[]{
                 new StructField("productid", DataTypes.LongType, false, Metadata.empty()),
                 new StructField("lastsale", DataTypes.IntegerType, false, Metadata.empty()),
-                new StructField("sales", DataTypes.BooleanType, false, Metadata.empty())
+                new StructField("sales", DataTypes.IntegerType, false, Metadata.empty())
         });
 
         Dataset<Row> inventoryData = sparkApplication.getSession().createDataFrame(inventoryRows, schema);
